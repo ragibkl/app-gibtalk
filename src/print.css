@@ -1,0 +1,99 @@
+.b-print {
+  display: none;
+}
+
+@media print {
+  body.b-printing > :not(.b-print) {
+    display: none !important;
+  }
+
+  body.b-printing .b-print {
+    display: block;
+    color: #000;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .b-page {
+    display: flex;
+    flex-direction: column;
+    height: 189mm;
+    break-after: page;
+    overflow: hidden;
+  }
+
+  .b-page:last-child {
+    break-after: auto;
+  }
+
+  .b-page-head,
+  .b-page-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .b-page-head {
+    margin-bottom: 2mm;
+    font-size: 14pt;
+    font-weight: bold;
+  }
+
+  .b-page-back {
+    font-weight: normal;
+  }
+
+  .b-page-foot {
+    margin-top: 1.5mm;
+    font-size: 8pt;
+    color: #555;
+  }
+
+  .b-page-grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(var(--b-cols), minmax(0, 1fr));
+    grid-template-rows: repeat(var(--b-rows), minmax(0, 1fr));
+    gap: 2mm;
+  }
+
+  .b-print-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 0;
+    padding: 1.5mm;
+    border: 0.6mm solid #000;
+    border-radius: 2.5mm;
+    background: #9bf59b;
+  }
+
+  .b-print-cell.folder {
+    background: #ffee33;
+  }
+
+  .b-print-cell img,
+  .b-print-cell > span:first-child {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 1.5mm;
+  }
+
+  .b-print-label {
+    margin-top: 1mm;
+    font-size: var(--b-label);
+    font-weight: bold;
+    line-height: 1.1;
+    text-align: center;
+  }
+
+  .b-print-to {
+    font-weight: normal;
+    white-space: nowrap;
+  }
+}
+
