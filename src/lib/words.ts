@@ -3,7 +3,10 @@
 // and folders holding more words in `children`.
 import YAML from "yaml";
 
-/** The app's language codes (GibTalk src/service/speech.ts). */
+/**
+ * The languages always offered. Any other language the browser has a voice for
+ * is offered too (see speech.ts), as the app offers the device's languages.
+ */
 export const APP_LANGUAGES = [
   { code: "en", label: "English" },
   { code: "ms", label: "Bahasa Malaysia" },
@@ -14,7 +17,30 @@ export const APP_LANGUAGES = [
   { code: "tu", label: "Telugu" },
 ] as const;
 
-export type Language = (typeof APP_LANGUAGES)[number]["code"];
+/**
+ * A language code as the app stores it: the base code ("es", not "es-ES"), and
+ * "tu" for Telugu. Any language is kept, even one this browser can't speak.
+ */
+export type Language = string;
+
+const names = (() => {
+  try {
+    return new Intl.DisplayNames(["en"], { type: "language" });
+  } catch {
+    return undefined;
+  }
+})();
+
+/** "es" → "Spanish". */
+export function languageLabel(code: Language): string {
+  const own = APP_LANGUAGES.find((l) => l.code === code);
+  if (own) return own.label;
+  try {
+    return names?.of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
 
 /** A word being edited. `id` only lives in the builder, never in the file. */
 export type BuilderWord = {
@@ -40,7 +66,7 @@ export function newId(): string {
 }
 
 function isLanguage(value: unknown): value is Language {
-  return APP_LANGUAGES.some((l) => l.code === value);
+  return typeof value === "string" && /^[a-z]{2,3}$/.test(value);
 }
 
 function fromFile(items: unknown, fallback: Language): BuilderWord[] {
