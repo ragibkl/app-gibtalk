@@ -1,6 +1,7 @@
 // Adding or changing one word or folder: its name, language and picture.
 import { useEffect, useState } from "preact/hooks";
-import { APP_LANGUAGES, newId, type BuilderWord, type Language } from "../lib/words";
+import { APP_LANGUAGES, languageLabel, newId, type BuilderWord, type Language } from "../lib/words";
+import { voiceLanguages } from "../lib/speech";
 import { searchSymbols } from "../lib/api";
 import { pickPhoto } from "../lib/files";
 import Dialog from "./Dialog";
@@ -77,9 +78,9 @@ export default function WordDialog({ word, folder, language, onSave, onDelete, o
           </label>
           <label>
             Spoken in
-            <select value={lang} onChange={(e) => setLang(e.currentTarget.value as Language)}>
-              {APP_LANGUAGES.map((l) => (
-                <option value={l.code}>{l.label}</option>
+            <select value={lang} onChange={(e) => setLang(e.currentTarget.value)}>
+              {languageChoices(lang).map((code) => (
+                <option value={code}>{languageLabel(code)}</option>
               ))}
             </select>
           </label>
@@ -142,4 +143,16 @@ export default function WordDialog({ word, folder, language, onSave, onDelete, o
       )}
     </Dialog>
   );
+}
+
+/**
+ * GibTalk's own languages first, then every other language this browser can
+ * speak (and the word's own, even without a voice), by name.
+ */
+function languageChoices(current: Language): Language[] {
+  const own = APP_LANGUAGES.map((l) => l.code as Language);
+  const others = [...new Set([...voiceLanguages(), current])]
+    .filter((code) => !own.includes(code))
+    .sort((a, b) => languageLabel(a).localeCompare(languageLabel(b)));
+  return [...own, ...others];
 }

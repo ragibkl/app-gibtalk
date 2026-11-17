@@ -2,14 +2,9 @@
 // browser and computer: Edge has Malay; Chrome on Windows often doesn't.
 import type { Language } from "./words";
 
-const BCP47: Record<Language, string> = {
-  en: "en",
-  ms: "ms",
-  id: "id",
-  zh: "zh",
-  ta: "ta",
-  tu: "te",
-};
+/** The app stores Telugu as "tu"; browsers call it "te". */
+const bcp47 = (language: Language) => (language === "tu" ? "te" : language);
+const baseOf = (lang: string) => lang.toLowerCase().split(/[-_]/)[0];
 
 let voices: SpeechSynthesisVoice[] = [];
 const listeners = new Set<() => void>();
@@ -29,10 +24,8 @@ export function onVoicesChanged(listener: () => void): () => void {
 }
 
 function voiceFor(language: Language): SpeechSynthesisVoice | undefined {
-  const code = BCP47[language];
-  const matching = voices.filter(
-    (v) => v.lang.toLowerCase().split(/[-_]/)[0] === code,
-  );
+  const code = bcp47(language);
+  const matching = voices.filter((v) => baseOf(v.lang) === code);
   // Prefer the Malaysian/Indian variants, then any local voice.
   const regional = { ms: "my", ta: "in", te: "in", en: "", id: "", zh: "" }[code] ?? "";
   return (
@@ -46,6 +39,22 @@ export function hasVoice(language: Language): boolean {
   return !!voiceFor(language);
 }
 
+/** Languages this browser has a voice for, as the app stores them. */
+export function voiceLanguages(): Language[] {
+  const codes = new Set(voices.map((v) => baseOf(v.lang)));
+  return [...codes].map((c) => (c === "te" ? "tu" : c));
+}
+
+/**
+ * The language for a new set's first word: the browser's own language when
+ * there's a voice for it, otherwise English.
+ */
+export function startLanguage(): Language {
+  const own = baseOf(navigator.language || "en");
+  const code = own === "te" ? "tu" : own;
+  return hasVoice(code) ? code : "en";
+}
+
 export function canSpeak(): boolean {
   return "speechSynthesis" in window && voices.length > 0;
 }
@@ -53,7 +62,7 @@ export function canSpeak(): boolean {
 export function speak(text: string, language: Language) {
   if (!("speechSynthesis" in window)) return;
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = BCP47[language];
+  u.lang = bcp47(language);
   const voice = voiceFor(language);
   if (voice) u.voice = voice;
   speechSynthesis.speak(u);

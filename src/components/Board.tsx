@@ -3,9 +3,17 @@
 // changes words in place; drag to reorder.
 import { useEffect, useMemo, useState } from "preact/hooks";
 import type { WordSet } from "../lib/store";
-import { APP_LANGUAGES, type BuilderWord, type Language } from "../lib/words";
+import { languageLabel, type BuilderWord, type Language } from "../lib/words";
 import { folderNames, move, replaceAt, wordsAt } from "../lib/tree";
-import { canSpeak, hasVoice, onVoicesChanged, speak, speakAll, stopSpeaking } from "../lib/speech";
+import {
+  canSpeak,
+  hasVoice,
+  onVoicesChanged,
+  speak,
+  speakAll,
+  startLanguage,
+  stopSpeaking,
+} from "../lib/speech";
 import WordDialog from "./WordDialog";
 import ShareDialog from "./ShareDialog";
 import PrintDialog from "./PrintDialog";
@@ -57,7 +65,7 @@ export default function Board({ set, shared, onChange, onSaveShared, onExit }: P
 
   const words = wordsAt(set.words, path);
   const names = folderNames(set.words, path);
-  const lastLanguage: Language = words[words.length - 1]?.language ?? set.words[0]?.language ?? "en";
+  const lastLanguage: Language = words[words.length - 1]?.language ?? set.words[0]?.language ?? startLanguage();
 
   const missingVoices = useMemo(
     () =>
@@ -122,7 +130,7 @@ export default function Board({ set, shared, onChange, onSaveShared, onExit }: P
         <div class="banner warn">
           This browser has no{" "}
           {missingVoices
-            .map((l) => APP_LANGUAGES.find((x) => x.code === l)?.label ?? l)
+            .map(languageLabel)
             .join(" or ")}{" "}
           voice, so those words use another voice. Microsoft Edge has Malay, Tamil
           and Chinese voices.
