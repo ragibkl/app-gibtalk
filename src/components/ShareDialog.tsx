@@ -49,6 +49,10 @@ export default function ShareDialog({ set, onClose }: Props) {
             Anyone with this link or code gets a copy of the set. It travels inside
             the link itself: nothing is uploaded or stored anywhere.
           </p>
+          <p>
+            <strong>Keep this link:</strong> it's also a backup. Opening it later
+            lets you save and edit the set again, on any computer.
+          </p>
           {link.photosLeftOut > 0 && (
             <p class="note">
               {link.photosLeftOut} photo{link.photosLeftOut > 1 ? "s are" : " is"} left

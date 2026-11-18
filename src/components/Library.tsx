@@ -1,6 +1,6 @@
 // "My sets": the word sets kept in this browser.
 import { useEffect, useState } from "preact/hooks";
-import { deleteSet, listSets, newSetId, saveSet, type WordSet } from "../lib/store";
+import { deleteSet, isSafari, listSets, newSetId, saveSet, type WordSet } from "../lib/store";
 import { countWords, parseTemplate } from "../lib/words";
 import { downloadWords, pickWordFile } from "../lib/files";
 import { getTemplate, getTemplates, type TemplateOption } from "../lib/api";
@@ -137,6 +137,12 @@ export default function Library({ onOpen }: Props) {
       <footer class="lib-foot muted">
         Sets are saved in this browser only. To use one on another device, tap Share and
         scan the code, or download the file for the GibTalk app. <a href="https://gibtalk.com">gibtalk.com</a>
+        {isSafari && (
+          <p class="note">
+            Safari clears a site's saved sets if you don't visit it for 7 days. Keep a share link
+            or download a file of each set you want to keep.
+          </p>
+        )}
       </footer>
 
       {sharing && <ShareDialog set={sharing} onClose={() => setSharing(null)} />}

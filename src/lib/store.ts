@@ -42,7 +42,26 @@ export function getSet(id: string): Promise<WordSet | undefined> {
 
 export async function saveSet(set: WordSet): Promise<void> {
   await run("readwrite", (s) => s.put({ ...set, updated: Date.now() }));
+  keepStorage();
 }
+
+/**
+ * Asks the browser not to clear these sets when the disk runs low. Chrome and
+ * Edge decide quietly; Firefox would ask with a pop-up, so it isn't asked.
+ */
+let askedToKeep = false;
+function keepStorage() {
+  if (askedToKeep || /firefox/i.test(navigator.userAgent)) return;
+  askedToKeep = true;
+  navigator.storage?.persisted?.()
+    .then((kept) => (kept ? true : navigator.storage.persist()))
+    .catch(() => {});
+}
+
+/** Safari deletes a site's saved data after 7 days without a visit. */
+export const isSafari =
+  /safari/i.test(navigator.userAgent) &&
+  !/chrome|chromium|crios|fxios|edg|android/i.test(navigator.userAgent);
 
 export async function deleteSet(id: string): Promise<void> {
   await run("readwrite", (s) => s.delete(id));
