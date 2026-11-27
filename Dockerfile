@@ -1,5 +1,5 @@
 # builder
-FROM node:24.22.2-slim AS builder
+FROM node:24.22.3-slim AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -11,7 +11,7 @@ RUN npm test && npm run build
 # Official nginx image (security releases land the same day), run fully as
 # the unprivileged nginx user like nginxinc/nginx-unprivileged: no `user`
 # directive, PID and temp files in /tmp, cache owned by nginx, port 8080.
-FROM nginx:1.31.9-alpine AS runner
+FROM nginx:1.31.10-alpine AS runner
 RUN sed -i -e '/^user /d' -e 's,^pid .*,pid /tmp/nginx.pid;,' /etc/nginx/nginx.conf \
  && sed -i '/^http {/a \    client_body_temp_path /tmp/client_temp;\n    proxy_temp_path /tmp/proxy_temp;\n    fastcgi_temp_path /tmp/fastcgi_temp;\n    uwsgi_temp_path /tmp/uwsgi_temp;\n    scgi_temp_path /tmp/scgi_temp;' /etc/nginx/nginx.conf \
  && chown -R 101:101 /var/cache/nginx
